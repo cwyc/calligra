@@ -7,6 +7,7 @@
  * SPDX-License-Identifier: LGPL-2.0-or-later
  */
 
+#include <iostream>
 #include <algorithm>
 
 #include "KoModeBox_p.h"
@@ -54,6 +55,7 @@ public:
         , verticalTabsSide(TopSide)
         , horizontalTabsSide(LeftSide)
         , horizontalMode(false)
+        , stackCollapsed(false)
     {
     }
 
@@ -72,6 +74,7 @@ public:
     VerticalTabsSide verticalTabsSide;
     HorizontalTabsSide horizontalTabsSide;
     bool horizontalMode;
+    bool stackCollapsed;
 };
 
 QString KoModeBox::applicationName;
@@ -143,6 +146,7 @@ KoModeBox::KoModeBox(KoCanvasControllerWidget *canvas, const QString &appName)
 
     d->tabBar->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(d->tabBar, &QTabBar::currentChanged, this, &KoModeBox::toolSelected);
+    connect(d->tabBar, &QTabBar::tabBarClicked, this, &KoModeBox::tabBarClicked);
     connect(d->tabBar, &QWidget::customContextMenuRequested, this, &KoModeBox::slotContextMenuRequested);
 
     connect(KoToolManager::instance(), &KoToolManager::changedTool,
@@ -566,6 +570,36 @@ void KoModeBox::toolSelected(int index)
     }
 }
 
+void KoModeBox::tabBarClicked(int index)
+{
+    if(index != -1 && d->activeId == d->addedToolActions.at(index)->buttonGroupId()){
+        toggleStack();
+    }else{
+        expandStack();
+    }
+}
+
+void KoModeBox::expandStack(){
+    if(!d->stackCollapsed) return;
+    d->stackCollapsed = false;
+    d->stack->show();
+    d->layout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+}
+
+void KoModeBox::collapseStack(){
+    if(d->stackCollapsed) return;
+    d->stackCollapsed = true;
+    d->stack->hide();
+    d->layout->setSizeConstraint(QLayout::SetFixedSize);
+}
+
+void KoModeBox::toggleStack(){
+    if(d->stackCollapsed){
+        expandStack();
+    }else{
+        collapseStack();
+    }
+}
 void KoModeBox::slotContextMenuRequested(const QPoint &pos)
 {
     QMenu menu;

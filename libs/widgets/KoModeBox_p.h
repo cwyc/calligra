@@ -49,6 +49,8 @@ public:
     explicit KoModeBox(KoCanvasControllerWidget *canvas, const QString &applicationName);
     ~KoModeBox() override;
 
+    QSize sizeHint() const override;
+
     /**
      * Should been called when the docker position has changed.
      * Organise widgets and icons and orientation of the tabs.
@@ -88,6 +90,8 @@ private Q_SLOTS:
 
     /// slot for when a new item have been selected in the QToolBox
     void toolSelected(int index);
+
+    void tabBarClicked(int index);
 
     /// slot for context menu of the tabbar
     void slotContextMenuRequested(const QPoint &pos);
@@ -131,6 +135,10 @@ private:
     QIcon createSimpleIcon(KoToolAction *toolAction) const;
     void addItem(KoToolAction *toolAction);
     void setIconSize() const;
+
+    void collapseStack();
+    void expandStack();
+    void toggleStack();
 
 private:
     class Private;
